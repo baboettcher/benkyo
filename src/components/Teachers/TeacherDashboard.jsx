@@ -12,7 +12,8 @@ import TeacherDashboardAssignments from './TeacherDashboard_Assignments.jsx'
 import TeacherDashboardStudents from './TeacherDashboard_StudentRecords.jsx'
 import TeacherDashboardAssessments from './TeacherDashboard_Assessments.jsx'
 import TeacherDashboardHome from './TeacherDashboard_Home.jsx'
-import moment from 'moment'
+import TeacherDashboardTest from './TeacherDashboard_Test.jsx'
+
 
 @connect((store) => {
   return {
@@ -29,14 +30,8 @@ export default class TeacherDashboard extends React.Component {
     this.state = {
       showAssignmentPanel: true
     }
-    this.changeDashboardView = this.changeDashboardView.bind(this);
   }
 
-changeDashboardView(){
-  this.setState({
-    showAssignmentPanel: !this.state.showAssignmentPanel
-  });
-}
 
 render(){
   const { showAssignmentPanel }  = this.state;
@@ -50,10 +45,8 @@ render(){
           <Route path="/students" component={TeacherDashboardStudents} />
           <Route path="/assignments" component={TeacherDashboardAssignments} />
           <Route path="/assessments" component={TeacherDashboardAssessments} />
+          <Route path="/test" component={TeacherDashboardTest} />
       </Switch>
-
-
-
       </div>
     </BrowserRouter>
   )

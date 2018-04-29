@@ -21,7 +21,8 @@ module.exports = {
           ],
   output: {
     filename: 'bundle.js',
-    path: __dirname
+    path: __dirname,
+    publicPath: '/' // added to allow page refresh on RR routes
   },
   module: {
     loaders: [
@@ -36,6 +37,9 @@ module.exports = {
       }
     ]
   },
+  devServer: {
+    historyApiFallback: true,
+  },// added to allow page refresh on RR routes
   node: {
    fs: "empty"
   }

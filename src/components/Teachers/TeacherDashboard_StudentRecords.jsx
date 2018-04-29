@@ -5,7 +5,6 @@ import axios from 'axios';
 import { SetListOfStudents, SetAllClassrooms, SetCurrentClassrooms, StoreAllAssessments, SetAllLiveAssignments } from './TeacherActions';
 import Promise from 'bluebird';
 import _ from 'lodash';
-//import TeacherDashboard_Assignments from './TeacherDashboard_Assignments.jsx'
 import moment from 'moment'
 
 export default connect((store) => {
@@ -29,19 +28,18 @@ class TeacherDashboard extends React.Component {
       magnify_current_level: null
     }
     this.handleSort = this.handleSort.bind(this)
-    this.ViewMoreDetails = this.ViewMoreDetails.bind(this)
-    this.resetModal = this.resetModal.bind(this);
+   // this.ViewMoreDetails = this.ViewMoreDetails.bind(this)
+  // this.resetModal = this.resetModal.bind(this);
   }
 
+
   componentDidMount() {
+
     const{user_cred, classrooms} = this.props;
 
-    /// ** - we iterate thought assessments, order them by key, add them to the store
-    firebase.database().ref(`assessments`).orderByKey().once('value').then(function(snapshot){
-      this.props.dispatch(StoreAllAssessments(snapshot.val()))
-    }.bind(this))
 
-    // ** - new promise here, how does this connect? what is passed to line 50?
+/* 
+
     new Promise (function(resolve, reject){
 
       // ** - here we iterate over the classes the teacher has
@@ -69,9 +67,14 @@ class TeacherDashboard extends React.Component {
     .then(function(currentClassroom){
 
 
+
+ */ // Promise commented out temporarily
+
+    // this commented out from orginal change
     // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
 
     // changed assignment to STUDENT
+
       firebase.database().ref(`student`).once('value')
       .then(function(snapshot){
 
@@ -83,7 +86,7 @@ class TeacherDashboard extends React.Component {
             const fullName = STUDENT.val().default_profile.name.fullName;
             const firstName = STUDENT.val().default_profile.name.givenName;
             const lastName = STUDENT.val().default_profile.name.familyName;
-            const currentFluencyScore = STUDENT.val().academicRecord ? STUDENT.val().academicRecord.currentReadingLevel : "unavail";
+            const currentFluencyScore = STUDENT.val().academicRecord ? STUDENT.val().academicRecord.currentReadingLevel : "NO DATA";
             
             var obj = {
               fullName,
@@ -97,16 +100,16 @@ class TeacherDashboard extends React.Component {
 
           });
 
-          // update store, 
+          // update store
           this.props.dispatch(SetListOfStudents(allLiveSTUDENTS));
         }
       }.bind(this))
-    }.bind(this))
+    //}.bind(this))
   }
+ 
 
 
-
-
+/* 
   ViewMoreDetails(student, assessmentID, flac_info, transcribedText) {
     this.setState({
       magnify_student: student,
@@ -115,8 +118,9 @@ class TeacherDashboard extends React.Component {
       magnify_transcribedText: transcribedText,
       more_details: true
     })
-  }
+  } */
 
+/* 
   resetModal() {
     this.setState({
       magnify_student: null,
@@ -127,18 +131,18 @@ class TeacherDashboard extends React.Component {
       adjust_student_level: false,
       magnify_current_level: "na"
     })
-  }
+  } */
 
   handleSort(clickedColumn) {
     const { column, direction } = this.state
-    const {live_assignments} = this.props;
+    const {currentStudentList} = this.props;
 
     if (column !== clickedColumn) {
       this.setState({
         column: clickedColumn,
         direction: 'ascending'
       })
-      this.props.dispatch(SetAllLiveAssignments(_.sortBy(live_assignments, [clickedColumn])));
+      this.props.dispatch(SetListOfStudents(_.sortBy(currentStudentList, [clickedColumn])));
       return
     }
 
@@ -146,49 +150,45 @@ class TeacherDashboard extends React.Component {
       direction: direction === 'ascending' ? 'descending' : 'ascending',
     })
 
-    this.props.dispatch(SetAllLiveAssignments(live_assignments.reverse()));
+    this.props.dispatch(SetListOfStudents(currentStudentList.reverse()));
   }
 
 
 
 
   render() {
+
     const { currentStudentList, all_assessments, live_assignments, user_cred} = this.props;
-    const {column, direction, more_details, magnify_student, 
+    console.log(currentStudentList);
+
+    const { column, direction, more_details, 
+      magnify_student, 
       magnify_assessmentID,
       magnify_flac, 
       magnify_transcribedText, 
       adjust_student_level,
-      magnify_current_level,
-      
+      magnify_current_level 
     } = this.state;
 
-    
     return (
       <Segment vertical>
         <Grid stackable>
           <Grid.Row>
             <Grid.Column width={15}>
             <h3>Student Records</h3>
-     
               <Table celled sortable>
                 <Table.Header>
+
+
                   <Table.Row>
-
                     <Table.HeaderCell sorted={column === 'last_name' ? direction : null } onClick={()=>{this.handleSort('last_name')}}>Last</Table.HeaderCell>
-
                     <Table.HeaderCell sorted={column === 'first_name' ? direction : null } onClick={()=>{this.handleSort('first_name')}}>First</Table.HeaderCell>
-
                     <Table.HeaderCell sorted={column === 'current_level' ? direction : null} onClick={() => { this.handleSort('current_level') }}>Current Level</Table.HeaderCell>
-
-                    <Table.HeaderCell sorted={column === 'average_wpm' ? direction : null} onClick={() => { this.handleSort('average_wpm')}}>Average WPM</Table.HeaderCell>
-
-                    <Table.HeaderCell sorted={column === 'recent_assessment' ? direction : null} onClick={() => { this.handleSort('recent_assessment')}} >Recordings</Table.HeaderCell>
-
-      
+                    <Table.HeaderCell sorted={column === 'current_wpm' ? direction : null} onClick={() => { this.handleSort('current_wpm')}}>WPM</Table.HeaderCell>
+                    <Table.HeaderCell sorted={column === 'most_recent_recording' ? direction : null} onClick={() => { this.handleSort('most_recent_recording')}} >Most Recent Recording</Table.HeaderCell>
                   </Table.Row>
-                </Table.Header>
 
+                </Table.Header>
                 <Table.Body>
                   {currentStudentList.map((studentRecord, key)=>{
   
@@ -211,7 +211,7 @@ class TeacherDashboard extends React.Component {
                             {studentRecord.currentFluencyScore}    
                         </Table.Cell>
 
-                        <Table.Cell>coming</Table.Cell>
+                        <Table.Cell>{studentRecord.gmailUid}</Table.Cell>
  
                         <Table.Cell>coming</Table.Cell>
 
@@ -223,38 +223,15 @@ class TeacherDashboard extends React.Component {
                 </Table.Body>
               </Table>
             </Grid.Column>
-            <Grid.Column width={5}>
-              <ClassroomByGoogle />
-              <ClassroomByGoogle />
-            </Grid.Column>
           </Grid.Row>
-        </Grid>
+        </Grid> 
 
-        <Modal open={more_details} onClose={this.resetModal} closeIcon>
-          <Modal.Header>
-            <Segment vertical style={{padding: '0px'}}>
-            {magnify_student}'s Recordings - scroll through recordings here.
-            </Segment>
-          </Modal.Header>
-          <Modal.Content>
-            <Modal.Description>
-              <Header>Assessment: {magnify_assessmentID}</Header>
-              <p>{magnify_flac}</p>
-              <p><strong>ORIGINAL TEXT:</strong></p>
-              <p>{all_assessments && all_assessments[magnify_assessmentID] ? all_assessments[magnify_assessmentID].Text.long : null}</p>
-            </Modal.Description>
-          </Modal.Content>
-        </Modal>
-        
-        <Modal open={adjust_student_level} onClose={this.resetModal} closeIcon>
-          <Modal.Content>
-            <Modal.Description>
-              <Header>{magnify_student}'s current level is {magnify_current_level}. Select her new level from the menu:</Header>
-              <p>NEXT: iterate througth all assessmenst and add a drop down menu here</p>
-              <p>SECOND: set this value onto student profile when the student completes the assessment. Later add qualifiers, ie must get a certain percent according to MBI Magical Benkyo Index</p>
-            </Modal.Description>
-          </Modal.Content>
-        </Modal>
+
+
+
+
+
+
 
       </Segment>
       )

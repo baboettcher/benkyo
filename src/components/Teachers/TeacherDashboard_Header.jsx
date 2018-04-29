@@ -25,6 +25,9 @@ class Header extends Component {
         </Menu.Item>,
         <Menu.Item key={3}>
           <Link to="/assessments">Assessment Pool</Link>
+        </Menu.Item>,
+        <Menu.Item key={4}>
+          <Link to="/test">Test</Link>
         </Menu.Item>
       ]
     }

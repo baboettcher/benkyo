@@ -19,7 +19,6 @@ class TeacherDashboard extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      teacherDashboardMode: 'assignments',
       more_details: false,
       magnify_assessmentID: null,
       magnify_flac: null,
@@ -36,22 +35,24 @@ class TeacherDashboard extends React.Component {
   }
 
   componentDidMount() {
-    const{user_cred, classrooms} = this.props;
+
+    // 1 - updating assessments, order them, and set to store
+    const{ user_cred, classrooms } = this.props;
+
     firebase.database().ref(`assessments`).orderByKey().once('value').then(function(snapshot){
       this.props.dispatch(StoreAllAssessments(snapshot.val()))
     }.bind(this))
-    new Promise (function(resolve, reject){
 
+    // 2 - Get current classroom ( Q: "new Promise" when Firebase already returns prom...?)
+    new Promise (function(resolve, reject){
       firebase.database().ref(`teacher/${user_cred.uid}/classes`).once('value').then(function(snapshot){
         var arrayOfClasses = [];
         var currentClassroom = null;
-        // How does this works, as it sores an array with the -primary content and the class content?
         snapshot.forEach(function(classes){
           arrayOfClasses.push(classes.val());
           if (!currentClassroom) {
             // does it resolve ONLY in the first classroom that it finds?
             currentClassroom = classes.val();
-            // console.log(currentClassroom);
             resolve(currentClassroom);
             firebase.database().ref(`/classes/${currentClassroom}`).once('value').then(function(snapshot){
               if (snapshot.val()){
@@ -63,11 +64,12 @@ class TeacherDashboard extends React.Component {
         this.props.dispatch(SetAllClassrooms(arrayOfClasses));
       }.bind(this))
     }.bind(this))
+
+    // 3 - SetAllLiveAssignments to the store
     .then(function(currentClassroom){
       // firebase.database().ref(`assignment`).orderByChild('courseID').equalTo(currentClassroom).once('value')
       firebase.database().ref(`assignment`).once('value')
       .then(function(snapshot){
-       // console.log("assignment snapshots.val==>", snapshot.val() )
         if (snapshot.val()) {
           var allLiveAssignments = [];
           snapshot.forEach(function(assignment){
@@ -118,6 +120,8 @@ class TeacherDashboard extends React.Component {
     }.bind(this))
   }
 
+
+
   ViewMoreDetails(student, assessmentID, flac_info, transcribedText) {
     this.setState({
       magnify_student: student,
@@ -137,7 +141,6 @@ class TeacherDashboard extends React.Component {
       more_details: false, 
       adjust_student_level: false,
       magnify_current_level: "na"
-
     })
   }
 
@@ -187,7 +190,6 @@ class TeacherDashboard extends React.Component {
     }
   }
 
-
   handleCurrentLevel(name, email, assessmentID, assignmentId){
     this.setState({
       magnify_student: name,
@@ -206,8 +208,7 @@ class TeacherDashboard extends React.Component {
       magnify_flac, 
       magnify_transcribedText, 
       adjust_student_level,
-      magnify_current_level,
-      teacherDashboardMode
+      magnify_current_level
     } = this.state;
 
     return (
@@ -218,6 +219,7 @@ class TeacherDashboard extends React.Component {
               <AssignAssessment/>
               <Table celled sortable>
                 <Table.Header>
+
                   <Table.Row>
                     <Table.HeaderCell sorted={column === 'name' ? direction : null} onClick={()=>{this.handleSort('name')}}>Student</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'assessment' ? direction : null} onClick={()=>{this.handleSort('assessment')}}>Assessment</Table.HeaderCell>
@@ -227,8 +229,9 @@ class TeacherDashboard extends React.Component {
                     <Table.HeaderCell>Recording</Table.HeaderCell>
                     <Table.HeaderCell>Delete</Table.HeaderCell>
                   </Table.Row>
-                </Table.Header>
 
+
+                </Table.Header>
                 <Table.Body>
                   {live_assignments.map((assignment, key)=>{
                     if (assignment.scoreFromFuzzySet) {
