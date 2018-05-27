@@ -21,7 +21,7 @@ class HomePage extends Component {
     return (
       <div>
         <ul>
-          <h2>Benkyo Teacher Dashboard</h2>
+          <h2>Benkyo2.0 Teacher Dashboard</h2>
           <img src={user_cred.photoURL} alt="placeholder" height="42" width="42" />
           <li>Teacher name: {user_cred.displayName}</li>
           <li>Last Login:{user_cred.metadata.lastSignInTime}</li>
