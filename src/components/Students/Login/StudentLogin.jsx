@@ -43,7 +43,7 @@ class StudentLogin extends React.Component {
       var errorMessage = error.message;
       // The email of the user's account used.
       var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
+      //   The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
       // ...
     });
