@@ -43,7 +43,7 @@ export default connect((store) => {
       this.props.dispatch(AssignItinStone()); // this sets done_selecting to TRUE
 
 
-      // read the correct user
+      // read the correct user b
       console.log("STONE--> ID: ", obj.studentID);
       console.log("Info--> ", obj.studentInfo);
       console.log("current_target_student-->", current_target_student)
